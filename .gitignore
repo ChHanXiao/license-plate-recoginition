@@ -1,0 +1,5 @@
+.vscode
+workspace/*
+datasets/*
+__pycache__/
+!workspace/lp_model_best.pth

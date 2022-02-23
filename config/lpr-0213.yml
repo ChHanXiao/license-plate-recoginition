@@ -1,0 +1,79 @@
+save_dir: workspace/lp0213
+input_size: [96,48] #[w,h]
+mean: [127.5,127.5,127.5]
+std: [0.0078125,0.0078125,0.0078125]
+lpr_max_len: 8
+T_length: 18
+model:
+  name: PlateNet_multi_1
+data:
+  train:
+    img_dir:
+    - /home/hanxiao/data/lp-data/train-1
+    - /home/hanxiao/data/lp-data/train-2
+    - /home/hanxiao/data/lp-data/train-3
+    - /home/hanxiao/data/lp-data/train-4
+    - /home/hanxiao/data/lp-data/train-green-1
+    - /home/hanxiao/data/lp-data/train-green-2
+    - /home/hanxiao/data/lp-data/train-green
+    # - /home/hanxiao/data/lp-data/train-green-same
+    - datasets/CCPD2019/crop/train_sub
+    - datasets/CCPD2020/crop/train
+    # - datasets/CCPD2020/crop/val
+  val:
+    img_dir:
+    - datasets/CCPD2019/crop/test
+    # - datasets/CCPD2020/crop/test
+device:
+  gpu_ids: [0] # Set like [0, 1, 2, 3] if you have multi-GPUs
+  workers_per_gpu: 8
+  batchsize_per_gpu: 100
+schedule:
+  # resume:
+  # load_model: workspace/lp0123/model_best/lp_model_best.pth
+  optimizer:
+    name: AdamW
+    lr: 0.001
+    weight_decay: 0.06
+  warmup:
+    name: linear
+    steps: 5000
+    ratio: 0.0001
+  total_epochs: 100
+  lr_schedule:
+    name: CosineAnnealingLR
+    T_max: 100
+    eta_min: 0.00005
+  val_intervals: 10
+grad_clip: 35
+
+log:
+  interval: 50
+
+CHARS: ['京', '沪', '津', '渝', '冀', '晋', '蒙', '辽', '吉', '黑',
+        '苏', '浙', '皖', '闽', '赣', '鲁', '豫', '鄂', '湘', '粤',
+        '桂', '琼', '川', '贵', '云', '藏', '陕', '甘', '青', '宁',
+        '新', '学', '港', '澳', '警', '使', '领', '应', '急', '挂',
+        '民', '航',
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 
+        'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K',
+        'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
+        'W', 'X', 'Y', 'Z', '-'
+        ]
+LP_CATE: ['blue',
+          'green+s','green+b',
+          'yellow+s','yellow+m',
+          'black',
+          'white+jc','white+yj','white+wj','white+jd',
+          'white+wjm','white+jdm',
+          'farm+m','airport'
+          ]
+
+LP_CATE_SUB: ['blue',
+              'green+s','green+b',
+              'yellow+s','yellow+m',
+              'black',
+              'white+jc','white+yj','white+wj',
+              'white+wjm','white+jd','white+jdm',
+              'farm+m','airport'
+              ]
