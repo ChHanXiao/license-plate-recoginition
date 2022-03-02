@@ -3,7 +3,7 @@ Date: 2022-01-05 22:53:35
 Author: ChHanXiao
 Github: https://github.com/ChHanXiao
 LastEditors: ChHanXiao
-LastEditTime: 2022-02-14 12:18:46
+LastEditTime: 2022-03-02 21:21:08
 FilePath: /license-plate-recoginition/test.py
 '''
 import argparse
@@ -53,9 +53,6 @@ def main(args):
     task = TrainingTask(cfg)
     ckpt = torch.load(args.model)
     task.model.load_state_dict(ckpt["state_dict"])
-    # task.load_state_dict(ckpt["state_dict"])
-
-    # task.model.load_state_dict(ckpt["state_dict"])
     trainer = pl.Trainer(
         default_root_dir=cfg.save_dir,
         gpus=cfg.device.gpu_ids,

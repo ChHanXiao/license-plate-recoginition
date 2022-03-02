@@ -3,15 +3,14 @@ Date: 2022-01-11 21:45:55
 Author: ChHanXiao
 Github: https://github.com/ChHanXiao
 LastEditors: ChHanXiao
-LastEditTime: 2022-01-12 08:40:49
-FilePath: /license-plate-recoginition/infer.py
+LastEditTime: 2022-03-02 21:49:11
+FilePath: /license-plate-recoginition/inference.py
 '''
 
 import argparse
 import os
 import sys
 from locale import normalize
-
 sys.path.insert(0,os.getcwd())
 import cv2
 import numpy as np
@@ -25,7 +24,6 @@ from data.load_data import LPRDataLoader, collate_fn
 from task import TrainingTask
 from utils import (LPLightningLogger, cfg, get_image_list, load_config,
                    load_model_weight, mkdir)
-
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -78,12 +76,16 @@ class Perdictor(object):
 def main(args):
     load_config(cfg, args.config)
     local_rank = -1
-    torch.backends.cudnn.enabled = True
-    torch.backends.cudnn.benchmark = True
+    device='cpu' 
+    if torch.cuda.is_available():
+        device='cuda' 
+        torch.backends.cudnn.enabled = True
+        torch.backends.cudnn.benchmark = True
+
     mkdir(local_rank, cfg.save_dir)
     logger = LPLightningLogger(cfg.save_dir)
     logger.dump_cfg(cfg)
-    LP_Rec = Perdictor(cfg, args.model, logger,)
+    LP_Rec = Perdictor(cfg, args.model, logger, device=device)
 
     if os.path.isdir(args.path):
         files = get_image_list(args.path)
@@ -92,14 +94,18 @@ def main(args):
     files.sort()
     for image_name in files:
         meta, result = LP_Rec.inference(image_name)
-        target = meta["img_info"]["file_name"].split('-')[2]
-        if target!=result[0]:
-            save_path = 'workspace/result/' + meta["img_info"]["file_name"]
-            img = meta["raw_img"]
-            img = cv2ImgAddText(img, result[0], (0, 0))
-
-            cv2.imwrite(save_path, img)
-            print(f'target:{target},pred:{result[0]}')
+        img = meta["raw_img"]
+        save_path = 'workspace/result/' + meta["img_info"]["file_name"]
+        img = cv2ImgAddText(img, result[0], (0, 0))
+        cv2.imwrite(save_path, img)
+        print(f'file_name:{meta["img_info"]["file_name"]},pred:{result[0]}')
+        # target = meta["img_info"]["file_name"].split('-')[2]
+        # if target!=result[0]:
+        #     save_path = 'workspace/result/' + meta["img_info"]["file_name"]
+        #     img = meta["raw_img"]
+        #     img = cv2ImgAddText(img, result[0], (0, 0))
+        #     cv2.imwrite(save_path, img)
+        #     print(f'target:{target},pred:{result[0]}')
 
 
 def cv2ImgAddText(img, text, pos, textColor=(255, 0, 0), textSize=12):
